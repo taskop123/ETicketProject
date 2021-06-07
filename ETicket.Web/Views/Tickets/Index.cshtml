@@ -1,0 +1,37 @@
+﻿@model IEnumerable<ETicket.Web.Models.Domain.Ticket>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<div class="container">
+    <div class="row">
+        @foreach (var ticket in Model.ToList())
+        {
+        <div class="col-4">
+            <div class="card" style="width:18rem;">
+                <img class="card-img-top h-75" src="@ticket.MovieImage" alt="Movie Image">
+                <div class="card-body">
+                    <h5 class="card-title">@ticket.MovieTitle</h5>
+                    <p class="card-text">@ticket.Description</p>
+                    <h6>Price:<b> $@ticket.Price</b></h6>
+                    <h6>Date:<b> @ticket.Date</b></h6>
+                    <div class="card-footer text-center">
+                        <a asp-controller="Tickets" asp-action="AddToShoppingCart" asp-route-id="@ticket.Id" class="btn btn-primary">Add to Cart</a> <br />
+                        <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@ticket.Id" >Edit</a> <br />
+                        <a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.Id">Details</a> <br />
+                        <a asp-controller="Tickets" asp-action="Delete" asp-route-id="@ticket.Id">Delete</a> <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>

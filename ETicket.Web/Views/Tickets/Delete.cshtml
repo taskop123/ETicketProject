@@ -1,4 +1,4 @@
-﻿@model ETicket.Web.Models.Domain.Ticket
+﻿@model ETicket.Domain.DomainModels.Ticket
 
 @{
     ViewData["Title"] = "Delete";
@@ -12,34 +12,40 @@
     <h4>Ticket</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.MovieTitle)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.MovieTitle)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.MovieCategory)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.MovieCategory)
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.MovieImage)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MovieImage)
+        <dd class="col-sm-10">
+            <img src="@Model.MovieImage" alt="Movie Poster" />
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Price)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Price)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Description)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Description)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Date)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Date)
         </dd>
     </dl>

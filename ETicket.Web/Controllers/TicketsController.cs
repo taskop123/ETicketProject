@@ -79,7 +79,7 @@ namespace ETicket.Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,MovieTitle,MovieImage,Price,Description,Date")] Ticket ticket)
+        public IActionResult Create([Bind("Id,MovieTitle,MovieCategory,MovieImage,Price,Description,Date")] Ticket ticket)
         {
             if (ModelState.IsValid)
             {
@@ -110,7 +110,7 @@ namespace ETicket.Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Id,MovieTitle,MovieImage,Price,Description,Date")] Ticket ticket)
+        public IActionResult Edit(Guid id, [Bind("Id,MovieTitle,MovieCategory,MovieImage,Price,Description,Date")] Ticket ticket)
         {
             if (id != ticket.Id)
             {

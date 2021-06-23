@@ -9,9 +9,14 @@ namespace ETicket.Domain.DomainModels
     public class Ticket : BaseEntity
     {
         [Required]
+        [Display(Name = "Movie Title")]
         public string MovieTitle { get; set; }
         [Required]
+        [Display(Name = "Movie Image")]
         public string MovieImage { get; set; }
+        [Required]
+        [Display(Name = "Category")]
+        public string MovieCategory { get; set; }
         [Required]
         public float Price { get; set; }
         [Required]

@@ -1,4 +1,7 @@
-﻿using ETicket.Domain.Identity;
+﻿using ETicket.Domain.DTO;
+using ETicket.Domain.Identity;
+using ETicket.Service.Implementation;
+using ETicket.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +18,58 @@ namespace ETicket.Web.Controllers
 
         private readonly UserManager<ETicketAppUser> _userManager;
         private readonly SignInManager<ETicketAppUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUserService _userService;
 
-        public AccountController(UserManager<ETicketAppUser> userManager, SignInManager<ETicketAppUser> signInManager)
+        public AccountController(UserManager<ETicketAppUser> userManager, SignInManager<ETicketAppUser> signInManager, RoleManager<IdentityRole> roleManager, IUserService userService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
+            _userService = userService;
+        }
+        [Authorize(Roles = "Admin")]
+        public IActionResult AddUserToRole()
+        {
+            AddUserToRole model = new AddUserToRole();
+
+            List<ETicketAppUser> users = _userService.GetAllUsers().ToList();
+
+            foreach(var user in users)
+            {
+                model.UserEmails.Add(user);
+            }
+
+            model.Roles.Add("Standard User");
+            model.Roles.Add("Admin");
+
+            return View(model);
+        }
+        [HttpPost, Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddUserToRole(AddUserToRole model)
+        {
+            ETicketAppUser user = await _userManager.FindByIdAsync(model.SelectedUserId);
+            List<string> roles = new List<string>
+            {
+                "Standard User",
+                "Admin"
+            };
+            foreach(var i in roles)
+            {
+                if (await _userManager.IsInRoleAsync(user, i))
+                {
+                    await _userManager.RemoveFromRoleAsync(user, i);
+                }
+            }
+
+            var res = await _userManager.AddToRoleAsync(user, model.SelectedRole);
+
+            if (res.Succeeded)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult Register()
@@ -46,8 +96,24 @@ namespace ETicket.Web.Controllers
                         ShoppingCart = new ETicket.Domain.DomainModels.ShoppingCart()
                     };
                     var result = await _userManager.CreateAsync(user, model.Password);
+                    
                     if (result.Succeeded)
                     {
+                        bool roleExists = await _roleManager.RoleExistsAsync("Standard User");
+
+                        if (!roleExists)
+                        {
+                            await _roleManager.CreateAsync(new IdentityRole("Standard User"));
+                            
+                        }
+                        roleExists = await _roleManager.RoleExistsAsync("Admin");
+
+                        if (!roleExists)
+                        {
+                            await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                        }
+
+                        var res = await _userManager.AddToRoleAsync(user, "Standard User");
                         return RedirectToAction("Login");
                     }
                     else

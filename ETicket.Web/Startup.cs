@@ -34,19 +34,25 @@ namespace ETicket.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddRazorPages()
+                .AddRazorRuntimeCompilation();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddDefaultIdentity<ETicketAppUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddTransient<ITicketService, TicketService>();
+            services.AddTransient<IShoppingCartService, ShoppingCartService>();
+            services.AddTransient<IUserService, UserService>();
 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
 
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
-
-            services.AddTransient<ITicketService, TicketService>();
-            services.AddTransient<IShoppingCartService, ShoppingCartService>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();

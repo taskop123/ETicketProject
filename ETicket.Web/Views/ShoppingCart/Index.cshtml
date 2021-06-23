@@ -1,0 +1,68 @@
+﻿@using Microsoft.Extensions.Options
+@inject IOptions<ETicket.Domain.StripeSettings> Stripe
+@model ETicket.Domain.DTO.ShoppingCartDto
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Shopping Cart Info</h1>
+
+<div class="container">
+
+    <div class="row">
+        @if (Model.TotalPrice != 0) 
+         {
+            <form asp-controller="ShoppingCart" asp-action="PayOrder" method="post">
+                <article>
+                    <script src="https://checkout.stripe.com/checkout.js"
+                            class="stripe-button"
+                            data-key="@Stripe.Value.PublishableKey"
+                            data-amount="@(Convert.ToInt32(Model.TotalPrice) * 100)"
+                            data-locale="auto"
+                            data-description="ETicket App Payment"
+                            data-label="Pay $@Model.TotalPrice">
+                    </script>
+                </article>
+            </form>
+         }
+    </div>
+
+    <div class="row">
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <td scope="col">#</td>
+                    <td scope="col">Title</td>
+                    <td scope="col">Date</td>
+                    <td scope="col">Price</td>
+                    <td scope="col">Quantity</td>
+                    <td scope="col">Total</td>
+                    <td scope="col"></td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.TicketsInShoppingCarts.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7">You have no tickets in your shopping cart! Click <a asp-controller="Tickets" asp-action="Index">here</a> to browse tickets!</td>
+                    </tr>
+                }
+                @for (var i = 0; i < Model.TicketsInShoppingCarts.Count; i++)
+                {
+                    var item = Model.TicketsInShoppingCarts[i];
+                    <tr>
+                        <td>@(i+1)</td>
+                        <td>@item.Ticket.MovieTitle</td>
+                        <td>@item.Ticket.Date</td>
+                        <td>@item.Ticket.Price</td>
+                        <td>@item.Quantity</td>
+                        <td>$@(item.Ticket.Price * item.Quantity)</td>
+                        <td><a asp-route-ticketId="@item.TicketId" asp-action="DeleteTicketFromShoppingCart" class="btn btn-outline-danger text-dark">Delete</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

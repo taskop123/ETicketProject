@@ -30,15 +30,30 @@ namespace ETicket.Service.Implementation
             if(item.TicketId != null && cart != null)
             {
                 Ticket ticket = this.ticketRepository.Get(item.TicketId);
+               
+                IList<TicketsInShoppingCart> ticketsInShoppingCarts = this.ticketsInShoppingCartRepository.GetAll().ToList();
+
+                foreach (var i in ticketsInShoppingCarts)
+                {
+                    if (i.TicketId.Equals(item.TicketId) && i.ShoppingCartId.Equals(cart.Id))
+                    {
+                        var ticketInShoppingCart = this.ticketsInShoppingCartRepository.Get(i.Id);
+                        ticketInShoppingCart.Quantity += item.Quantity;
+
+                        this.ticketsInShoppingCartRepository.Update(ticketInShoppingCart);
+
+                        return true;
+                    }
+                }
 
                 if(ticket != null)
                 {
                     TicketsInShoppingCart model = new TicketsInShoppingCart
                     {
-                        Ticket = ticket,
-                        TicketId = ticket.Id,
                         ShoppingCart = cart,
                         ShoppingCartId = cart.Id,
+                        Ticket = ticket,
+                        TicketId = ticket.Id,
                         Quantity = item.Quantity
                     };
                     this.ticketsInShoppingCartRepository.Insert(model);

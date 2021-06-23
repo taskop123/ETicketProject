@@ -39,12 +39,12 @@ namespace ETicket.Repository
             builder.Entity<TicketsInShoppingCart>()
                 .HasOne(z => z.Ticket)
                 .WithMany(z => z.ShoppingCarts)
-                .HasForeignKey(z => z.ShoppingCartId);
+                .HasForeignKey(z => z.TicketId);
 
             builder.Entity<TicketsInShoppingCart>()
                 .HasOne(z => z.ShoppingCart)
                 .WithMany(z => z.TicketsInShoppingCart)
-                .HasForeignKey(z => z.TicketId);
+                .HasForeignKey(z => z.ShoppingCartId);
 
             builder.Entity<ShoppingCart>()
                 .HasOne<ETicketAppUser>(z => z.Owner)
@@ -57,12 +57,12 @@ namespace ETicket.Repository
             builder.Entity<TicketsInOrder>()
                 .HasOne(z => z.Ticket)
                 .WithMany(z => z.Orders)
-                .HasForeignKey(z => z.OrderId);
+                .HasForeignKey(z => z.TicketId);
 
             builder.Entity<TicketsInOrder>()
                 .HasOne(z => z.Order)
                 .WithMany(z => z.TicketsInOrder)
-                .HasForeignKey(z => z.TicketId);
+                .HasForeignKey(z => z.OrderId);
         }
     }
 }

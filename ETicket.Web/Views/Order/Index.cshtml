@@ -1,0 +1,51 @@
+﻿@model IEnumerable<ETicket.Domain.DomainModels.Order>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    @foreach(var order in Model.ToList())
+    {
+        <div class="row">
+            <div class="row">
+                <h3 class="display-4 d-block">Order No:<b>@order.Id</b></h3>
+                <a class="btn btn-success d-block" asp-action="CreateInvoice" asp-route-id="@order.Id">Create invoice</a>
+            </div>
+        </div>
+        <div class="row">
+                @foreach(var ticket in order.TicketsInOrder)
+                {
+                <div class="col-4">
+                    <div class="pl-0 py-3">
+                        <div class="card" style="width:18rem; height:35rem;">
+                            <img class="card-img-top h-50" src="@ticket.Ticket.MovieImage" alt="Movie Image">
+                            <div class="card-body">
+                                <h4 class="card-title text-center">@ticket.Ticket.MovieTitle</h4>
+                                <div class="row">
+                                    <div class="col-6 text-right" style="margin-right:-20px;">
+                                        <p><b>Category: </b></p>
+                                    </div>
+                                    <div class="col-6 text-left">
+                                        <p class="card-text">@ticket.Ticket.MovieCategory</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-right" style="margin-right:-20px;">
+                                        <p><b>Description: </b></p>
+                                    </div>
+                                    <div class="col-6 text-left">
+                                        <p class="card-text">@ticket.Ticket.Description</p>
+                                    </div>
+                                </div>
+                                <h6>Price:<b> $@ticket.Ticket.Price</b></h6>
+                                <h6>Date:<b> @ticket.Ticket.Date</b></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+        </div>
+    }
+</div>

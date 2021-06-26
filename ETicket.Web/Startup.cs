@@ -48,9 +48,11 @@ namespace ETicket.Web
             services.AddTransient<ITicketService, TicketService>();
             services.AddTransient<IShoppingCartService, ShoppingCartService>();
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IOrderService, ETicket.Service.Implementation.OrderService>();
 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
+            services.AddScoped(typeof(IOrderRepository), typeof(OrderRepository));
 
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
 

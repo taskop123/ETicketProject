@@ -1,12 +1,16 @@
-﻿using ETicket.Domain.DTO;
+﻿using ETicket.Domain.DomainModels;
+using ETicket.Domain.DTO;
 using ETicket.Domain.Identity;
 using ETicket.Service.Implementation;
 using ETicket.Service.Interface;
+using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -184,5 +188,92 @@ namespace ETicket.Web.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public IActionResult ImportUsers()
+        {
+            return View();
+        }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult ImportUsers(IFormFile file)
+        {
+            string pathToUpload = $"{Directory.GetCurrentDirectory()}\\Files\\{file.FileName}";
+            using (FileStream fs = System.IO.File.Create(pathToUpload))
+            {
+                file.CopyTo(fs);
+                fs.Flush();
+            }
+
+            List<UserRegisterDto> users = getAllUsersFromFile(file.FileName);
+
+            bool status = true;
+
+            foreach (var user in users)
+            {
+                var check = _userManager.FindByEmailAsync(user.Email).Result;
+                if (check == null)
+                {
+                    if (user.Password.Equals(user.ConfirmPassword))
+                    {
+                        var res = _userManager.CreateAsync(new ETicketAppUser
+                        {
+                            UserName = user.Email,
+                            NormalizedUserName = user.Email.ToUpper(),
+                            Email = user.Email,
+                            NormalizedEmail = user.Email.ToUpper(),
+                            EmailConfirmed = true,
+                            PhoneNumberConfirmed = true,
+                            ShoppingCart = new ShoppingCart()
+                        }, user.Password).Result;
+
+                        status = status && res.Succeeded;
+                    }
+                    else
+                    {
+                        status = false;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            if (status)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
+        }
+        private List<UserRegisterDto> getAllUsersFromFile(string fileName)
+        {
+            List<UserRegisterDto> users = new List<UserRegisterDto>();
+
+            string filePath = $"{Directory.GetCurrentDirectory()}\\Files\\{fileName}";
+
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            using (FileStream fs = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(fs))
+                {
+                    while (reader.Read())
+                    {
+                        users.Add(new UserRegisterDto
+                        {
+                            Email = reader.GetValue(0).ToString(),
+                            Password = reader.GetValue(1).ToString(),
+                            ConfirmPassword = reader.GetValue(2).ToString()
+                        });
+                    }
+                }
+            }
+            return users;
+        }
+
     }
 }

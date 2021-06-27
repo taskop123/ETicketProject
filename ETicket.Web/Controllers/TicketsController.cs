@@ -9,6 +9,9 @@ using System.Security.Claims;
 using ETicket.Service.Interface;
 using ETicket.Domain.DTO;
 using ETicket.Domain.DomainModels;
+using Microsoft.AspNetCore.Authorization;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace ETicket.Web.Controllers
 {
@@ -21,6 +24,20 @@ namespace ETicket.Web.Controllers
             this.ticketService = ticketService;
         }
 
+        //GET: Tickets in ascending order by date
+        public IActionResult SortTicketsByDateAsc()
+        {
+            var tickets = this.ticketService.GetAllTickets();
+            tickets.Sort((x, y) => DateTime.Compare(x.Date, y.Date));
+            return View("Index", tickets);
+        }
+        //GET: Tickets in descending order by date
+        public IActionResult SortTicketsByDateDesc()
+        {
+            var tickets = this.ticketService.GetAllTickets();
+            tickets.Sort((x, y) => DateTime.Compare(y.Date, x.Date));
+            return View("Index", tickets);
+        }
         // GET: Tickets
         public IActionResult Index()
         {
@@ -154,6 +171,59 @@ namespace ETicket.Web.Controllers
         private bool TicketExists(Guid id)
         {
             return this.ticketService.GetDetailsForTicket(id) != null;
+        }
+
+        [HttpGet, Authorize(Roles = "Admin")]
+        public IActionResult TicketExport()
+        {
+            TicketExportDto model = new TicketExportDto();
+            model.Categories.Add("Comedy");
+            model.Categories.Add("Thriller");
+            model.Categories.Add("Action");
+            model.Categories.Add("Family");
+            model.Categories.Add("Fantasy");
+            model.Categories.Add("Cartoon");
+
+            return View(model);
+        }
+        [HttpPost, Authorize(Roles = "Admin")]
+        public FileContentResult TicketExport(TicketExportDto model)
+        {
+            List<Ticket> ticketsByCategory = this.ticketService.GetTicketsByCategory(model.ChosenCategory);
+
+            string fileName = model.ChosenCategory + "Tickets.xlsx";
+            string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            using(var workbook = new XLWorkbook())
+            {
+                IXLWorksheet worksheet = workbook.Worksheets.Add("All tickets");
+
+                worksheet.Cell(1, 1).Value = "Category";
+                worksheet.Cell(1, 2).Value = model.ChosenCategory;
+                worksheet.Cell(2, 1).Value = "Ticket No.";
+                worksheet.Cell(2, 2).Value = "Movie Title";
+                worksheet.Cell(2, 3).Value = "Movie Price";
+                worksheet.Cell(2, 4).Value = "Movie Description";
+                worksheet.Cell(2, 5).Value = "Date";
+
+                for (int i = 0; i < ticketsByCategory.Count; i++)
+                {
+                    var ticket = ticketsByCategory[i];
+
+                    worksheet.Cell(3 + i, 1).Value = (i + 1);
+                    worksheet.Cell(3 + i, 2).Value = ticket.MovieTitle;
+                    worksheet.Cell(3 + i, 3).Value = "$" + ticket.Price;
+                    worksheet.Cell(3 + i, 4).Value = ticket.Description;
+                    worksheet.Cell(3 + i, 5).Value = ticket.Date.ToLongDateString().ToString();
+                }
+
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+
+                    return File(stream.ToArray(), contentType, fileName);
+                }
+            }
         }
     }
 }

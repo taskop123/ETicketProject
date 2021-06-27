@@ -11,7 +11,7 @@
 
 <div class="container">
 
-    <div class="row">
+    <div class="row mt-3">
         @if (Model.TotalPrice != 0) 
          {
             <form asp-controller="ShoppingCart" asp-action="PayOrder" method="post">
@@ -29,9 +29,9 @@
          }
     </div>
 
-    <div class="row">
-        <table class="table">
-            <thead class="thead-light">
+    <div class="row mt-3">
+        <table class="table table-striped">
+            <thead class="bg-dark text-white">
                 <tr>
                     <td scope="col">#</td>
                     <td scope="col">Title</td>
@@ -59,7 +59,7 @@
                         <td>@item.Ticket.Price</td>
                         <td>@item.Quantity</td>
                         <td>$@(item.Ticket.Price * item.Quantity)</td>
-                        <td><a asp-route-ticketId="@item.TicketId" asp-action="DeleteTicketFromShoppingCart" class="btn btn-outline-danger text-dark">Delete</a></td>
+                        <td><a asp-route-ticketId="@item.TicketId" asp-action="DeleteTicketFromShoppingCart" class="btn btn-danger text-light">Delete</a></td>
                     </tr>
                 }
             </tbody>

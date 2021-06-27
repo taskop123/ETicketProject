@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="2.13.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ETicket.Domain\ETicket.Domain.csproj" />
     <ProjectReference Include="..\ETicket.Repository\ETicket.Repository.csproj" />
   </ItemGroup>

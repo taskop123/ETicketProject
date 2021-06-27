@@ -24,9 +24,12 @@ namespace ETicket.Web
 {
     public class Startup
     {
+        private EmailSettings emailSettings;
         public Startup(IConfiguration configuration)
         {
+            emailSettings = new EmailSettings();
             Configuration = configuration;
+            configuration.GetSection("EmailSettings").Bind(emailSettings);
         }
 
         public IConfiguration Configuration { get; }
@@ -49,10 +52,13 @@ namespace ETicket.Web
             services.AddTransient<IShoppingCartService, ShoppingCartService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IOrderService, ETicket.Service.Implementation.OrderService>();
+            services.AddTransient<IEmailService, EmailService>();
 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
             services.AddScoped(typeof(IOrderRepository), typeof(OrderRepository));
+
+            services.AddScoped<EmailSettings>(es => emailSettings);
 
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
 

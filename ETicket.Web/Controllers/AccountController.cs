@@ -32,7 +32,7 @@ namespace ETicket.Web.Controllers
             _roleManager = roleManager;
             _userService = userService;
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Standard User")]
         public IActionResult AddUserToRole()
         {
             AddUserToRole model = new AddUserToRole();
@@ -49,7 +49,7 @@ namespace ETicket.Web.Controllers
 
             return View(model);
         }
-        [HttpPost, Authorize(Roles = "Admin")]
+        [HttpPost, Authorize(Roles = "Admin, Standard User")]
         public async Task<IActionResult> AddUserToRole(AddUserToRole model)
         {
             ETicketAppUser user = await _userManager.FindByIdAsync(model.SelectedUserId);
@@ -205,7 +205,7 @@ namespace ETicket.Web.Controllers
                 fs.Flush();
             }
 
-            List<UserRegisterDto> users = getAllUsersFromFile(file.FileName);
+            List<UserImportDto> users = getAllUsersFromFile(file.FileName);
 
             bool status = true;
 
@@ -214,25 +214,24 @@ namespace ETicket.Web.Controllers
                 var check = _userManager.FindByEmailAsync(user.Email).Result;
                 if (check == null)
                 {
-                    if (user.Password.Equals(user.ConfirmPassword))
+                    var res = _userManager.CreateAsync(new ETicketAppUser
                     {
-                        var res = _userManager.CreateAsync(new ETicketAppUser
-                        {
-                            UserName = user.Email,
-                            NormalizedUserName = user.Email.ToUpper(),
-                            Email = user.Email,
-                            NormalizedEmail = user.Email.ToUpper(),
-                            EmailConfirmed = true,
-                            PhoneNumberConfirmed = true,
-                            ShoppingCart = new ShoppingCart()
-                        }, user.Password).Result;
+                        UserName = user.Email,
+                        NormalizedUserName = user.Email.ToUpper(),
+                        Email = user.Email,
+                        NormalizedEmail = user.Email.ToUpper(),
+                        EmailConfirmed = true,
+                        PhoneNumberConfirmed = true,
+                        ShoppingCart = new ShoppingCart()
+                    }, user.Password).Result;
 
-                        status = status && res.Succeeded;
-                    }
-                    else
+                    if (res.Succeeded)
                     {
-                        status = false;
+                        var usr = _userManager.FindByEmailAsync(user.Email).Result;
+                        res = _userManager.AddToRoleAsync(usr, user.Role).Result;
                     }
+
+                    status = status && res.Succeeded;
                 }
                 else
                 {
@@ -249,9 +248,9 @@ namespace ETicket.Web.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
-        private List<UserRegisterDto> getAllUsersFromFile(string fileName)
+        private List<UserImportDto> getAllUsersFromFile(string fileName)
         {
-            List<UserRegisterDto> users = new List<UserRegisterDto>();
+            List<UserImportDto> users = new List<UserImportDto>();
 
             string filePath = $"{Directory.GetCurrentDirectory()}\\Files\\{fileName}";
 
@@ -263,11 +262,11 @@ namespace ETicket.Web.Controllers
                 {
                     while (reader.Read())
                     {
-                        users.Add(new UserRegisterDto
+                        users.Add(new UserImportDto
                         {
                             Email = reader.GetValue(0).ToString(),
                             Password = reader.GetValue(1).ToString(),
-                            ConfirmPassword = reader.GetValue(2).ToString()
+                            Role = reader.GetValue(2).ToString()
                         });
                     }
                 }

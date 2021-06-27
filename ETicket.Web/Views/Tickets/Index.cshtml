@@ -13,7 +13,15 @@
 
 
 <div class="container">
-
+    <div class="row">
+        <div class="col-10 text-right">
+            <p>Filter By: </p>
+        </div>
+        <div class="col-2">
+            <a asp-action="SortTicketsByDateAsc"><i class="fas fa-sort-up fa-2x"></i></a>
+            <a asp-action="SortTicketsByDateDesc"><i class="fas fa-sort-down fa-2x"></i></a>
+        </div>
+    </div>
     <div class="row">
         @if (Model.ToList().Count < 1)
         {
@@ -23,9 +31,9 @@
         }
         @foreach (var ticket in Model.ToList())
         {
-            <div class="col-4">
-                <div class="card" style="width:18rem;">
-                    <img class="card-img-top h-75" src="@ticket.MovieImage" alt="Movie Image">
+            <div class="col-4 mt-2">
+                <div class="card" style="width:20rem;height:52rem;">
+                    <img class="card-img-top" style="height:28rem;" src="@ticket.MovieImage" alt="Movie Image">
                     <div class="card-body">
                         <h4 class="card-title text-center">@ticket.MovieTitle</h4>
                         <div class="row">

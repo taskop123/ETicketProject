@@ -14,17 +14,19 @@ namespace ETicket.Service.Implementation
     {
         private readonly IRepository<ShoppingCart> shoppingCartRepository;
         private readonly IUserRepository userRepository;
-        private readonly IRepository<TicketsInShoppingCart> ticketsInShoppingCartsRepository;
+        private readonly IRepository<EmailMessage> emailRepository;
         private readonly IRepository<Order> orderRepository;
         private readonly IRepository<TicketsInOrder> ticketsInOrderRepository;
+        private readonly IEmailService emailService;
 
-        public ShoppingCartService(IRepository<TicketsInOrder> ticketsInOrderRepository, IRepository<ShoppingCart> shoppingCartRepository, IUserRepository userRepository, IRepository<TicketsInShoppingCart> ticketsInShoppingCartsRepository, IRepository<Order> orderRepository)
+        public ShoppingCartService(IEmailService emailService, IRepository<EmailMessage> emailRepository, IRepository<TicketsInOrder> ticketsInOrderRepository, IRepository<ShoppingCart> shoppingCartRepository, IUserRepository userRepository, IRepository<TicketsInShoppingCart> ticketsInShoppingCartsRepository, IRepository<Order> orderRepository)
         {
             this.shoppingCartRepository = shoppingCartRepository;
-            this.userRepository = userRepository;
-            this.ticketsInShoppingCartsRepository = ticketsInShoppingCartsRepository;
+            this.userRepository = userRepository;;
             this.orderRepository = orderRepository;
             this.ticketsInOrderRepository = ticketsInOrderRepository;
+            this.emailRepository = emailRepository;
+            this.emailService = emailService;
         }
 
         public bool DeleteProductFromShoppingCart(string userId, Guid id)
@@ -97,7 +99,7 @@ namespace ETicket.Service.Implementation
             this.orderRepository.Insert(order);
 
             ICollection<TicketsInOrder> tickets = new LinkedList<TicketsInOrder>();
-            foreach(var item in shoppingCart.TicketsInShoppingCart)
+            foreach (var item in shoppingCart.TicketsInShoppingCart)
             {
                 TicketsInOrder ticketsInOrder = new TicketsInOrder
                 {
@@ -117,6 +119,30 @@ namespace ETicket.Service.Implementation
 
             user.ShoppingCart.TicketsInShoppingCart.Clear();
             this.userRepository.Update(user);
+
+            EmailMessage emailMessage = new EmailMessage();
+            emailMessage.MailTo = user.Email;
+            emailMessage.Subject = "Successfully Created Order!";
+            emailMessage.Status = false;
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("Your order is completed. The Order contains: ");
+            var totalPrice = 0.0;
+
+            for (int i = 0; i < tickets.ToList().Count; i++)
+            {
+                var ticket = tickets.ToList()[i];
+                sb.AppendLine((i + 1).ToString() + ". Movie Title: " + ticket.Ticket.MovieTitle + " with price of: $" + ticket.Ticket.Price + " and quantity: " + ticket.Quantity);
+                totalPrice += ticket.Quantity * ticket.Ticket.Price;
+            }
+
+            sb.AppendLine("Total : $" + totalPrice.ToString());
+            emailMessage.Content = sb.ToString();
+
+            this.emailRepository.Insert(emailMessage);
+            this.emailService.SendEmailAsync(emailMessage);
+
 
             return true;
         }

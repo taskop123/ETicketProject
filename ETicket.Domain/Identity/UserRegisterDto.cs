@@ -8,7 +8,7 @@ namespace ETicket.Domain.Identity
 {
     public class UserRegisterDto
     {
-        [Required(ErrorMessage = "This Field is required")]
+        [Required(ErrorMessage = "This Field is Required!")]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
         public string Email { get; set; }
         [Required(ErrorMessage = "This field is Required!")]

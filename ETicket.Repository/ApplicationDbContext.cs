@@ -20,6 +20,7 @@ namespace ETicket.Repository
         public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public virtual DbSet<TicketsInOrder> TicketsInOrder { get; set; }
         public virtual DbSet<TicketsInShoppingCart> TicketsInShoppingCarts { get; set; }
+        public virtual DbSet<EmailMessage> EmailMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -32,9 +33,6 @@ namespace ETicket.Repository
             builder.Entity<ShoppingCart>()
                 .Property(z => z.Id)
                 .ValueGeneratedOnAdd();
-
-           /* builder.Entity<TicketsInShoppingCart>()
-                .HasKey(z => new { z.TicketId, z.ShoppingCartId });*/
 
             builder.Entity<TicketsInShoppingCart>()
                 .HasOne(z => z.Ticket)
@@ -50,9 +48,6 @@ namespace ETicket.Repository
                 .HasOne<ETicketAppUser>(z => z.Owner)
                 .WithOne(z => z.ShoppingCart)
                 .HasForeignKey<ShoppingCart>(z => z.OwnerId);
-
-           /* builder.Entity<TicketsInOrder>()
-                .HasKey(z => new { z.TicketId, z.OrderId });*/
 
             builder.Entity<TicketsInOrder>()
                 .HasOne(z => z.Ticket)

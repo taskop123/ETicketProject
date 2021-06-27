@@ -15,5 +15,6 @@ namespace ETicket.Service.Interface
         AddTicketToCartDto GetShoppingCartInfo(Guid? id);
         void DeleteTicket(Guid? id);
         bool AddToShoppingCart(AddTicketToCartDto item, string userId);
+        List<Ticket> GetTicketsByCategory(string category);
     }
 }

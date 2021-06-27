@@ -100,6 +100,13 @@ namespace ETicket.Service.Implementation
             return model;
         }
 
+        public List<Ticket> GetTicketsByCategory(string category)
+        {
+            return this.ticketRepository.GetAll()
+                .Where(z => z.MovieCategory.Equals(category))
+                .ToList();
+        }
+
         public void UpdateExistingTicket(Ticket t)
         {
             ticketRepository.Update(t);
